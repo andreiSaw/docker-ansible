@@ -1,0 +1,49 @@
+- hosts: localhost
+  pre_tasks:
+    - name: 'python-pip'
+      apt:
+        name: python-pip
+        state: present
+      register: python_pip_installed
+    - name: 'docker-py'
+      pip:
+        name: docker-py
+      when: python_pip_installed
+  tasks:
+    - name: .disney dir creating
+      file:
+        path: /.disney
+        state: directory
+        mode: "u=rwx,g=rwx,o="
+        owner: root
+      register: disney_dir_placed
+    - name: Docker-worker config
+      copy:
+        src: templates/configs/worker.cfg
+        dest: /.disney/worker.cfg
+      when: disney_dir_placed
+      register: worker_config_placed
+    - name: Disneyland config
+      copy:
+        src: templates/configs/config.yml
+        dest: /.disney/config.yml
+      when: disney_dir_placed
+      register: disneyland_config_placed
+    - name: DockerWorker container
+      docker_container:
+        name: docker-w
+        image: docker-worker
+        state: started
+        restart_policy: always
+        restart: yes
+        pull: no
+        docker_host: unix://var/run/docker.sock
+        volumes:
+        - /etc/ssl/docker-worker:/certificates
+        - /.disney/worker.cfg:/worker.cfg
+        - /var/run/docker.sock:/var/run/docker.sock
+        - /.disney/config.yml:/config.yml
+        env:
+          DOCKER_WORKER_CONFIG: /worker.cfg
+      when:
+      - worker_config_placed|success

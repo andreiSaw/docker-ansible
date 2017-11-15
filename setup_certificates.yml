@@ -1,0 +1,25 @@
+- hosts: localhost
+  tasks:
+    - name: Create students files dir
+      file:
+        path: /etc/ssl/docker-worker
+        state: directory
+        mode: "u=rwx,g=rwx,o="
+        owner: vagrant
+        recurse: yes
+      register: cert_dir_exists
+    - name: Copy CA Cert
+      copy:
+        src: templates/certificates/disneyland.crt
+        dest: /etc/ssl/docker-worker/disneyland.crt
+      when: cert_dir_exists|success
+    - name: Copy Client Cert
+      copy:
+        src: templates/certificates/test-user.crt
+        dest: /etc/ssl/docker-worker/test-user.crt
+      when: cert_dir_exists|success
+    - name: Copy Client Key
+      copy:
+        src: templates/certificates/test-user.key
+        dest: /etc/ssl/docker-worker/test-user.key
+      when: cert_dir_exists|success
