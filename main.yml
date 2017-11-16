@@ -1,2 +1,2 @@
-- import_playbook: setup_certificates.yml
+- import_playbook: setup_w_certificates.yml
 - import_playbook: setup_worker.yml

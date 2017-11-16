@@ -1,0 +1,5 @@
+server_cert: .disney/127.0.0.1.crt
+server_key: .disney/127.0.0.1.key
+ca_cert:  .disney/disneyland.crt
+listen_on: :50051
+db_uri: postgres://localhost/disneyland?sslmode=disable

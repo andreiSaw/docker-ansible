@@ -1,11 +1,13 @@
 - hosts: localhost
+  become: True
+  become_user: root
   tasks:
     - name: Create students files dir
       file:
         path: /etc/ssl/docker-worker
         state: directory
         mode: "u=rwx,g=rwx,o="
-        owner: vagrant
+        owner: root
         recurse: yes
       register: cert_dir_exists
     - name: Copy CA Cert

@@ -1,0 +1,31 @@
+- hosts: localhost
+  become: True
+  become_user: root
+  tasks:
+    - name: Install dependencies
+      apt: name={{ item }} state=present
+      with_items:
+       - git-core
+       - docker
+      register: tools_setup
+    - name: clone hellobaby git repo
+      git:
+        repo: https://github.com/andreiSaw/docker-images.git
+        dest: /docker-images
+        clone: yes
+        update: no
+      when: tools_setup
+      register: hellobaby_repo
+    - name: build images
+      become: yes
+      docker_image:
+        path: /docker-images/images/worker/
+        name: d-w
+        tag: v1
+        state: build
+      register: hellobaby_dir
+    - name: go to image
+      command: docker build -t docker-w .
+      args:
+        chdir: /docker-images/images/worker/
+      when: hellobaby_dir
